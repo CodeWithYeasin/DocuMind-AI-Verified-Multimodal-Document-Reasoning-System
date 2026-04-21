@@ -19,9 +19,9 @@ class VerificationResult:
 class AnswerVerifier:
     """Verify how well an answer is grounded in retrieved evidence."""
 
-    def verify(self, answer: str, evidence_chunks: Iterable[str]) -> VerificationResult:
+    def verify(self, answer: str, evidence_texts: Iterable[str]) -> VerificationResult:
         """Return confidence score and grounding label for an answer."""
-        evidence_text = "\n".join(chunk for chunk in evidence_chunks if chunk).strip()
+        evidence_text = "\n".join(chunk for chunk in evidence_texts if chunk).strip()
         answer_tokens = self._tokens(answer)
         evidence_tokens = self._tokens(evidence_text)
 

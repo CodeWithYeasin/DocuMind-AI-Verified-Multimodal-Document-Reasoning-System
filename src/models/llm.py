@@ -47,12 +47,16 @@ class LLMClient:
             "If uncertain, explicitly say the answer is not in the context.\n\n"
             f"Context:\n{context}\n\nQuestion: {question}"
         )
-        response = self._openai_client.chat.completions.create(
-            model=self.model_name,
-            temperature=self.temperature,
-            messages=[{"role": "user", "content": prompt}],
-        )
-        return response.choices[0].message.content.strip()
+        try:
+            response = self._openai_client.chat.completions.create(
+                model=self.model_name,
+                temperature=self.temperature,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("OpenAI generation failed, falling back to local mode: %s", exc)
+            return self._generate_locally(question, contexts)
 
     def _generate_locally(self, question: str, contexts: List[str]) -> str:
         """Generate deterministic local answer by selecting best-supported sentences."""

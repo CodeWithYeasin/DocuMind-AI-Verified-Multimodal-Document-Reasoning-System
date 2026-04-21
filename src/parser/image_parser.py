@@ -79,7 +79,10 @@ class ImageParser:
             text = pytesseract.image_to_string(image)
             return text.strip()
         except (tesseract_not_found_error, OSError, RuntimeError, TypeError) as exc:  # type: ignore[misc]
-            logger.warning("OCR failed: %s", exc)
+            logger.warning(
+                "OCR failed: %s. Install and configure tesseract-ocr to enable image text extraction.",
+                exc,
+            )
             return ""
 
     def _split_text(self, text: str) -> List[str]:

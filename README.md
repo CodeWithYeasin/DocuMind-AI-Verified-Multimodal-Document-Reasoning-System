@@ -100,6 +100,7 @@ Response includes:
 - API keys loaded via `.env` (`OPENAI_API_KEY`)
 - File upload extension whitelist
 - File-size limits (`MAX_UPLOAD_SIZE_MB`)
+- Current API session storage is in-memory; use a shared store (e.g., Redis) for multi-worker production deployments
 - No secret values committed
 
 ## Testing
