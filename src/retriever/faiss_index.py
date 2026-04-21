@@ -29,7 +29,7 @@ class FAISSRetriever:
 
             self.index = faiss.IndexFlatIP(self.embedding_model.vector_dim)
             self._faiss_available = True
-        except Exception as exc:  # pylint: disable=broad-except
+        except (ImportError, OSError) as exc:
             logger.warning("FAISS unavailable, using numpy retrieval: %s", exc)
 
     def build(self, chunks: Sequence[DocumentChunk]) -> None:

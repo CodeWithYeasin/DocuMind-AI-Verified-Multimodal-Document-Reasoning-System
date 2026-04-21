@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Dict, List
+from typing import List, Optional, TypedDict
 
 from src.models.llm import LLMClient
 from src.parser.image_parser import ImageParser
@@ -14,6 +14,26 @@ from src.retriever.faiss_index import FAISSRetriever
 from src.verifier.checker import AnswerVerifier
 
 logger = logging.getLogger(__name__)
+
+
+class EvidencePayload(TypedDict):
+    """Typed representation of a retrieved evidence item."""
+
+    chunk_id: str
+    text: str
+    source: str
+    page: Optional[int]
+    score: float
+
+
+class AskPayload(TypedDict):
+    """Typed representation of pipeline answer payload."""
+
+    answer: str
+    evidence: List[EvidencePayload]
+    confidence_score: float
+    verification_label: str
+    verification_reasoning: str
 
 
 class DocumentReasoningPipeline:
@@ -42,14 +62,14 @@ class DocumentReasoningPipeline:
         logger.info("Indexed %d chunks for %s", len(chunks), file_path)
         return len(chunks)
 
-    def ask(self, question: str, top_k: int = 5) -> Dict[str, object]:
+    def ask(self, question: str, top_k: int = 5) -> AskPayload:
         """Run retrieval, answer generation, and verification for a question."""
         results = self.retriever.retrieve(question, top_k=top_k)
         evidence_texts: List[str] = [chunk.text for chunk, _ in results]
         answer = self.llm.generate_answer(question, evidence_texts)
         verification = self.verifier.verify(answer, evidence_texts)
 
-        evidence_payload: List[Dict[str, object]] = []
+        evidence_payload: List[EvidencePayload] = []
         for chunk, score in results:
             evidence_payload.append(
                 {

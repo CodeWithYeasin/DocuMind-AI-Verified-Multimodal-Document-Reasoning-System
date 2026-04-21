@@ -31,7 +31,7 @@ class EmbeddingModel:
 
                 self._model = SentenceTransformer(model_name)
                 self.vector_dim = int(self._model.get_sentence_embedding_dimension())
-            except Exception as exc:  # pylint: disable=broad-except
+            except (ImportError, OSError, RuntimeError) as exc:
                 logger.warning("SentenceTransformer unavailable, using hash embeddings: %s", exc)
 
     def encode(self, texts: Iterable[str]) -> np.ndarray:

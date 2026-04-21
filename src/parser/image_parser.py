@@ -66,11 +66,20 @@ class ImageParser:
         """Extract OCR text using pytesseract when available."""
         try:
             import pytesseract  # type: ignore
+        except ImportError as exc:
+            logger.warning("OCR unavailable: %s", exc)
+            return ""
 
+        tesseract_not_found_error = getattr(
+            pytesseract,
+            "TesseractNotFoundError",
+            RuntimeError,
+        )
+        try:
             text = pytesseract.image_to_string(image)
             return text.strip()
-        except Exception as exc:  # pylint: disable=broad-except
-            logger.warning("OCR unavailable or failed: %s", exc)
+        except (tesseract_not_found_error, OSError, RuntimeError, TypeError) as exc:  # type: ignore[misc]
+            logger.warning("OCR failed: %s", exc)
             return ""
 
     def _split_text(self, text: str) -> List[str]:

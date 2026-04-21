@@ -26,7 +26,7 @@ class LLMClient:
                 from openai import OpenAI  # type: ignore
 
                 self._openai_client = OpenAI(api_key=api_key)
-            except Exception as exc:  # pylint: disable=broad-except
+            except ImportError as exc:
                 logger.warning("OpenAI SDK unavailable, using local fallback: %s", exc)
 
     def generate_answer(self, question: str, contexts: Iterable[str]) -> str:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import threading
 import uuid
 from pathlib import Path
 from typing import Dict
@@ -35,6 +36,7 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 MAX_UPLOAD_BYTES = settings.max_upload_size_mb * 1024 * 1024
 ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"}
 DOCUMENT_PIPELINES: Dict[str, DocumentReasoningPipeline] = {}
+PIPELINE_LOCK = threading.Lock()
 
 
 @app.get("/health")
@@ -69,14 +71,16 @@ async def upload_document(file: UploadFile = File(...)) -> UploadResponse:
         logger.exception("Document ingestion failed")
         raise HTTPException(status_code=400, detail=f"Ingestion failed: {exc}") from exc
 
-    DOCUMENT_PIPELINES[document_id] = pipeline
+    with PIPELINE_LOCK:
+        DOCUMENT_PIPELINES[document_id] = pipeline
     return UploadResponse(document_id=document_id, chunks_indexed=chunks)
 
 
 @app.post("/ask", response_model=AskResponse)
 def ask_question(request: AskRequest) -> AskResponse:
     """Answer a question using previously uploaded document context."""
-    pipeline = DOCUMENT_PIPELINES.get(request.document_id)
+    with PIPELINE_LOCK:
+        pipeline = DOCUMENT_PIPELINES.get(request.document_id)
     if pipeline is None:
         raise HTTPException(status_code=404, detail="Document not found")
 
