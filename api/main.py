@@ -35,6 +35,8 @@ UPLOAD_DIR = Path(settings.data_dir)
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 MAX_UPLOAD_BYTES = settings.max_upload_size_mb * 1024 * 1024
 ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff"}
+# In-memory store is suitable for a single-process deployment. Use a shared external
+# store and distributed locking in multi-worker production environments.
 DOCUMENT_PIPELINES: Dict[str, DocumentReasoningPipeline] = {}
 PIPELINE_LOCK = threading.Lock()
 

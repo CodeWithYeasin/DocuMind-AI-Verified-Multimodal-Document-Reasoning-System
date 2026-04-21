@@ -79,5 +79,5 @@ class PDFParser:
             chunks.append(" ".join(words[start:end]))
             if end >= len(words):
                 break
-            start = max(0, end - overlap_word_len)
+            start = end - overlap_word_len
         return chunks
