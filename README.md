@@ -56,6 +56,12 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
+Optional full install (Streamlit UI + sentence-transformers embeddings):
+
+```bash
+pip install -r requirements-full.txt
+```
+
 ## Run FastAPI
 
 ```bash

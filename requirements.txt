@@ -1,8 +1,6 @@
 fastapi
 uvicorn
-streamlit
 faiss-cpu
-sentence-transformers
 pydantic
 python-dotenv
 pdfplumber
