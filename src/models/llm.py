@@ -19,13 +19,29 @@ class LLMClient:
         self.temperature = temperature
         self.max_context_chars = 6000
         self._openai_client = None
+        self._openai_error_types: tuple[type[BaseException], ...] = (RuntimeError,)
 
         api_key = os.getenv("OPENAI_API_KEY", "")
         if api_key:
             try:
-                from openai import OpenAI  # type: ignore
+                from openai import (  # type: ignore
+                    APIConnectionError,
+                    APIError,
+                    AuthenticationError,
+                    BadRequestError,
+                    OpenAI,
+                    RateLimitError,
+                )
 
                 self._openai_client = OpenAI(api_key=api_key)
+                self._openai_error_types = (
+                    APIError,
+                    APIConnectionError,
+                    RateLimitError,
+                    AuthenticationError,
+                    BadRequestError,
+                    TimeoutError,
+                )
             except ImportError as exc:
                 logger.warning("OpenAI SDK unavailable, using local fallback: %s", exc)
 
@@ -54,7 +70,7 @@ class LLMClient:
                 messages=[{"role": "user", "content": prompt}],
             )
             return response.choices[0].message.content.strip()
-        except Exception as exc:  # noqa: BLE001
+        except self._openai_error_types as exc:
             logger.warning("OpenAI generation failed, falling back to local mode: %s", exc)
             return self._generate_locally(question, contexts)
 
